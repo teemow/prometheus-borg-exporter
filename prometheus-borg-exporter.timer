@@ -1,0 +1,8 @@
+[Unit]
+Description=Prometheus Borg Exporter Timer
+
+[Timer]
+OnCalendar=daily
+
+[Install]
+WantedBy=timers.target

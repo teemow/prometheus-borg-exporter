@@ -1,0 +1,7 @@
+[Unit]
+Description=Prometheus Borg Exporter
+After=network-online.target
+
+[Service]
+ExecStart=/usr/local/bin/borg_exporter
+Type=oneshot
