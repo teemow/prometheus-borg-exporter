@@ -34,3 +34,7 @@ backup_total_size_dedup{job='node'}
 backup_last_size_dedup{job='node'}
 backup_chunks_total{job='node'}
 ```
+
+### Grafana dashboard
+
+See [here](https://grafana.net/dashboards/1573) for a sample grafana dashboard.
