@@ -27,7 +27,7 @@ function calc_bytes {
 	UNIT=$2
 	
 	case "$UNIT" in
-		KB)
+		kB)
 			echo $NUM | awk '{ print $1 * 1024 }'
 			;;
 		MB)
@@ -35,6 +35,9 @@ function calc_bytes {
 			;;
 		GB)
 			echo $NUM | awk '{ print $1 * 1024 * 1024 * 1024 }'
+			;;
+		TB)
+			echo $NUM | awk '{ print $1 * 1024 * 1024 * 1024 * 1024 }'
 			;;
 	esac
 }
