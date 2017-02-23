@@ -7,6 +7,7 @@ source /etc/borg
 TEXTFILE_COLLECTOR_DIR=/var/lib/node_exporter/textfile_collector
 PROM_FILE=$TEXTFILE_COLLECTOR_DIR/backup.prom
 TMP_FILE=$PROM_FILE.$$
+HOSTNAME=$(hostname)
 LIST=$(BORG_PASSPHRASE=$BORG_PASSPHRASE borg list $REPOSITORY |awk '{print $1}')
 COUNTER=0
 
@@ -17,10 +18,10 @@ for i in $LIST; do
 done
 
 BORG_INFO=$(BORG_PASSPHRASE=$BORG_PASSPHRASE borg info "$REPOSITORY::$i")
-echo "backup_count $COUNTER" > $TMP_FILE
-echo "backup_files $(echo "$BORG_INFO" |grep "Number of files" |awk '{print $4}')" >> $TMP_FILE
-echo "backup_chunks_unique $(echo "$BORG_INFO" |grep "Chunk index" |awk '{print $3}')" >> $TMP_FILE
-echo "backup_chunks_total $(echo "$BORG_INFO" |grep "Chunk index" |awk '{print $4}')" >> $TMP_FILE
+echo "backup_count{host=\"${HOSTNAME}\"} $COUNTER" > $TMP_FILE
+echo "backup_files{host=\"${HOSTNAME}\"} $(echo "$BORG_INFO" | grep "Number of files" | awk '{print $4}')" >> $TMP_FILE
+echo "backup_chunks_unique{host=\"${HOSTNAME}\"} $(echo "$BORG_INFO" | grep "Chunk index" | awk '{print $3}')" >> $TMP_FILE
+echo "backup_chunks_total{host=\"${HOSTNAME}\"} $(echo "$BORG_INFO" | grep "Chunk index" | awk '{print $4}')" >> $TMP_FILE
 
 function calc_bytes {
 	NUM=$1
@@ -48,12 +49,11 @@ TOTAL_SIZE_COMPRESSED=$(calc_bytes $(echo "$BORG_INFO" |grep "All archives" |awk
 TOTAL_SIZE_DEDUP=$(calc_bytes $(echo "$BORG_INFO" |grep "All archives" |awk '{print $7}') $(echo "$BORG_INFO" |grep "All archives" |awk '{print $8}'))
 
 
-echo "backup_last_size $LAST_SIZE" >> $TMP_FILE
-echo "backup_last_size_compressed $LAST_SIZE_COMPRESSED" >> $TMP_FILE
-echo "backup_last_size_dedup $LAST_SIZE_DEDUP" >> $TMP_FILE
-echo "backup_total_size $TOTAL_SIZE" >> $TMP_FILE
-echo "backup_total_size_compressed $TOTAL_SIZE_COMPRESSED" >> $TMP_FILE
-echo "backup_total_size_dedup $TOTAL_SIZE_DEDUP" >> $TMP_FILE
-
+echo "backup_last_size{host=\"${HOSTNAME}\"} $LAST_SIZE" >> $TMP_FILE
+echo "backup_last_size_compressed{host=\"${HOSTNAME}\"} $LAST_SIZE_COMPRESSED" >> $TMP_FILE
+echo "backup_last_size_dedup{host=\"${HOSTNAME}\"} $LAST_SIZE_DEDUP" >> $TMP_FILE
+echo "backup_total_size{host=\"${HOSTNAME}\"} $TOTAL_SIZE" >> $TMP_FILE
+echo "backup_total_size_compressed{host=\"${HOSTNAME}\"} $TOTAL_SIZE_COMPRESSED" >> $TMP_FILE
+echo "backup_total_size_dedup{host=\"${HOSTNAME}\"} $TOTAL_SIZE_DEDUP" >> $TMP_FILE
 
 mv $TMP_FILE $PROM_FILE
