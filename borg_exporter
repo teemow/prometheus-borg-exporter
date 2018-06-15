@@ -14,7 +14,7 @@ COUNTER=0
 mkdir -p $TEXTFILE_COLLECTOR_DIR
 
 for i in $LIST; do
-	COUNTER=$((COUNTER+1))
+  COUNTER=$((COUNTER+1))
 done
 
 BORG_INFO=$(BORG_PASSPHRASE=$BORG_PASSPHRASE borg info "$REPOSITORY::$i")
@@ -24,23 +24,23 @@ echo "backup_chunks_unique{host=\"${HOSTNAME}\"} $(echo "$BORG_INFO" | grep "Chu
 echo "backup_chunks_total{host=\"${HOSTNAME}\"} $(echo "$BORG_INFO" | grep "Chunk index" | awk '{print $4}')" >> $TMP_FILE
 
 function calc_bytes {
-	NUM=$1
-	UNIT=$2
-	
-	case "$UNIT" in
-		kB)
-			echo $NUM | awk '{ print $1 * 1024 }'
-			;;
-		MB)
-			echo $NUM | awk '{ print $1 * 1024 * 1024 }'
-			;;
-		GB)
-			echo $NUM | awk '{ print $1 * 1024 * 1024 * 1024 }'
-			;;
-		TB)
-			echo $NUM | awk '{ print $1 * 1024 * 1024 * 1024 * 1024 }'
-			;;
-	esac
+  NUM=$1
+  UNIT=$2
+  
+  case "$UNIT" in
+    kB)
+      echo $NUM | awk '{ print $1 * 1024 }'
+      ;;
+    MB)
+      echo $NUM | awk '{ print $1 * 1024 * 1024 }'
+      ;;
+    GB)
+      echo $NUM | awk '{ print $1 * 1024 * 1024 * 1024 }'
+      ;;
+    TB)
+      echo $NUM | awk '{ print $1 * 1024 * 1024 * 1024 * 1024 }'
+      ;;
+  esac
 }
 
 # byte size
