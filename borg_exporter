@@ -4,7 +4,7 @@ set -eu
 
 source /etc/borg
 
-TEXTFILE_COLLECTOR_DIR=/var/lib/node_exporter/textfile_collector
+TEXTFILE_COLLECTOR_DIR=${COLLECTOR_DIR:-/var/lib/node_exporter/textfile_collector}
 PROM_FILE=$TEXTFILE_COLLECTOR_DIR/backup.prom
 TMP_FILE=$PROM_FILE.$$
 HOSTNAME=$(hostname)
