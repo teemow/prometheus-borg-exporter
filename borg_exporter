@@ -8,20 +8,24 @@ TEXTFILE_COLLECTOR_DIR=${COLLECTOR_DIR:-/var/lib/node_exporter/textfile_collecto
 PROM_FILE=$TEXTFILE_COLLECTOR_DIR/backup.prom
 TMP_FILE=$PROM_FILE.$$
 HOSTNAME=$(hostname)
-LIST=$(BORG_PASSPHRASE=$BORG_PASSPHRASE borg list $REPOSITORY |awk '{print $1}')
+LIST=$(BORG_PASSPHRASE=$BORG_PASSPHRASE borg list "$REPOSITORY" |awk '{print $1}')
 COUNTER=0
 
-mkdir -p $TEXTFILE_COLLECTOR_DIR
+mkdir -p "$TEXTFILE_COLLECTOR_DIR"
 
 for i in $LIST; do
   COUNTER=$((COUNTER+1))
 done
 
 BORG_INFO=$(BORG_PASSPHRASE=$BORG_PASSPHRASE borg info "$REPOSITORY::$i")
-echo "backup_count{host=\"${HOSTNAME}\"} $COUNTER" > $TMP_FILE
-echo "backup_files{host=\"${HOSTNAME}\"} $(echo "$BORG_INFO" | grep "Number of files" | awk '{print $4}')" >> $TMP_FILE
-echo "backup_chunks_unique{host=\"${HOSTNAME}\"} $(echo "$BORG_INFO" | grep "Chunk index" | awk '{print $3}')" >> $TMP_FILE
-echo "backup_chunks_total{host=\"${HOSTNAME}\"} $(echo "$BORG_INFO" | grep "Chunk index" | awk '{print $4}')" >> $TMP_FILE
+
+echo "backup_count{host=\"${HOSTNAME}\"} $COUNTER" > "$TMP_FILE"
+
+{
+  echo "backup_files{host=\"${HOSTNAME}\"} $(echo "$BORG_INFO" | grep "Number of files" | awk '{print $4}')"
+  echo "backup_chunks_unique{host=\"${HOSTNAME}\"} $(echo "$BORG_INFO" | grep "Chunk index" | awk '{print $3}')"
+  echo "backup_chunks_total{host=\"${HOSTNAME}\"} $(echo "$BORG_INFO" | grep "Chunk index" | awk '{print $4}')"
+} >> "$TMP_FILE"
 
 function calc_bytes {
   NUM=$1
@@ -29,16 +33,16 @@ function calc_bytes {
 
   case "$UNIT" in
     kB)
-      echo $NUM | awk '{ print $1 * 1024 }'
+      echo "$NUM" | awk '{ print $1 * 1024 }'
       ;;
     MB)
-      echo $NUM | awk '{ print $1 * 1024 * 1024 }'
+      echo "$NUM" | awk '{ print $1 * 1024 * 1024 }'
       ;;
     GB)
-      echo $NUM | awk '{ print $1 * 1024 * 1024 * 1024 }'
+      echo "$NUM" | awk '{ print $1 * 1024 * 1024 * 1024 }'
       ;;
     TB)
-      echo $NUM | awk '{ print $1 * 1024 * 1024 * 1024 * 1024 }'
+      echo "$NUM" | awk '{ print $1 * 1024 * 1024 * 1024 * 1024 }'
       ;;
   esac
 }
@@ -51,12 +55,13 @@ TOTAL_SIZE=$(calc_bytes $(echo "$BORG_INFO" |grep "All archives" |awk '{print $3
 TOTAL_SIZE_COMPRESSED=$(calc_bytes $(echo "$BORG_INFO" |grep "All archives" |awk '{print $5}') $(echo "$BORG_INFO" |grep "All archives" |awk '{print $6}'))
 TOTAL_SIZE_DEDUP=$(calc_bytes $(echo "$BORG_INFO" |grep "All archives" |awk '{print $7}') $(echo "$BORG_INFO" |grep "All archives" |awk '{print $8}'))
 
+{
+  echo "backup_last_size{host=\"${HOSTNAME}\"} $LAST_SIZE"
+  echo "backup_last_size_compressed{host=\"${HOSTNAME}\"} $LAST_SIZE_COMPRESSED"
+  echo "backup_last_size_dedup{host=\"${HOSTNAME}\"} $LAST_SIZE_DEDUP"
+  echo "backup_total_size{host=\"${HOSTNAME}\"} $TOTAL_SIZE"
+  echo "backup_total_size_compressed{host=\"${HOSTNAME}\"} $TOTAL_SIZE_COMPRESSED"
+  echo "backup_total_size_dedup{host=\"${HOSTNAME}\"} $TOTAL_SIZE_DEDUP"
+} >> "$TMP_FILE"
 
-echo "backup_last_size{host=\"${HOSTNAME}\"} $LAST_SIZE" >> $TMP_FILE
-echo "backup_last_size_compressed{host=\"${HOSTNAME}\"} $LAST_SIZE_COMPRESSED" >> $TMP_FILE
-echo "backup_last_size_dedup{host=\"${HOSTNAME}\"} $LAST_SIZE_DEDUP" >> $TMP_FILE
-echo "backup_total_size{host=\"${HOSTNAME}\"} $TOTAL_SIZE" >> $TMP_FILE
-echo "backup_total_size_compressed{host=\"${HOSTNAME}\"} $TOTAL_SIZE_COMPRESSED" >> $TMP_FILE
-echo "backup_total_size_dedup{host=\"${HOSTNAME}\"} $TOTAL_SIZE_DEDUP" >> $TMP_FILE
-
-mv $TMP_FILE $PROM_FILE
+mv "$TMP_FILE" "$PROM_FILE"
