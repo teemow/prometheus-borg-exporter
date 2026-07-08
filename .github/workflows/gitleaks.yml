@@ -1,21 +1,13 @@
 name: gitleaks
-
 on:
-  push:
   pull_request:
-
+  push:
+    branches: [master]
 permissions:
   contents: read
   pull-requests: write
-
 jobs:
-  scan:
-    name: gitleaks
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
-      - uses: gitleaks/gitleaks-action@v3
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  gitleaks:
+    uses: teemow/github-workflows/.github/workflows/gitleaks.yml@main
+    with:
+      runs-on: ubuntu-latest
