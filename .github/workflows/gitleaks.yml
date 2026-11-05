@@ -1,0 +1,13 @@
+name: gitleaks
+on:
+  pull_request:
+  push:
+    branches: [master]
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  gitleaks:
+    uses: teemow/github-workflows/.github/workflows/gitleaks.yml@main
+    with:
+      runs-on: ubuntu-latest
