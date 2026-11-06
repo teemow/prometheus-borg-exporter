@@ -8,13 +8,13 @@ TEXTFILE_COLLECTOR_DIR=${COLLECTOR_DIR:-/var/lib/node_exporter/textfile_collecto
 PROM_FILE=$TEXTFILE_COLLECTOR_DIR/backup.prom
 TMP_FILE=$PROM_FILE.$$
 HOSTNAME=$(hostname)
-LIST=$(BORG_PASSPHRASE=$BORG_PASSPHRASE borg list "$REPOSITORY" |awk '{print $1, $2}')
+LIST=$(BORG_PASSPHRASE=$BORG_PASSPHRASE borg list --short "$REPOSITORY")
 COUNTER=0
 
 mkdir -p "$TEXTFILE_COLLECTOR_DIR"
 
-IFS=$'\n'
-for i in ${LIST[@]}; do
+mapfile -t ARCHIVES <<< "$LIST"
+for i in "${ARCHIVES[@]}"; do
   COUNTER=$((COUNTER+1))
 done
 
