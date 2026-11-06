@@ -13,7 +13,7 @@ COUNTER=0
 
 mkdir -p "$TEXTFILE_COLLECTOR_DIR"
 
-mapfile -t ARCHIVES <<< "$LIST"
+mapfile -t ARCHIVES < <(printf '%s' "$LIST")
 for i in "${ARCHIVES[@]}"; do
   COUNTER=$((COUNTER+1))
 done
